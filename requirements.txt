@@ -13,5 +13,6 @@ promise==2.0.2
 singledispatch==3.4.0.3
 six==1.10.0
 SQLAlchemy==1.1.11
+SQLAlchemy-Paginator==0.1
 typing==3.6.1
 Werkzeug==0.12.2
