@@ -1,7 +1,7 @@
 import graphene
 from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
-from sqlalchemy import and_
+from sqlalchemy import or_
 
 from database import db_session, User as UserModel, Source as SourceModel, Issues as IssueModel, \
     Articles as ArticleModel
@@ -101,7 +101,7 @@ class Query(graphene.ObjectType):
     source = graphene.Field(lambda: Source, source_id=graphene.String(), source_name=graphene.String())
     issues = SQLAlchemyConnectionField(Issue)
     articles = SQLAlchemyConnectionField(Article)
-    # find_user = graphene.Field(lambda: Users, username=graphene.String())
+    find_user = graphene.Field(lambda: Users, username=graphene.String())
     all_users = SQLAlchemyConnectionField(Users)
 
     def resolve_find_user(self, args, context, info):
@@ -115,7 +115,7 @@ class Query(graphene.ObjectType):
         id = args.get('source_id')
         name = args.get('source_name')
         # you can also use and_ with filter() eg: filter(and_(param1, param2)).first()
-        return query.filter(and_(SourceModel.id == id, SourceModel.name == name)).first()
+        return query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
 
 
 class MyMutations(graphene.ObjectType):

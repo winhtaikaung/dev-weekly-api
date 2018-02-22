@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, Text, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, Text, String, ForeignKey
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -25,28 +25,31 @@ class User(Base):
 class Source(Base):
     __tablename__ = 'sources'
     id = Column(String(50), primary_key=True)
+    object_id = Column(String(50), unique=True)
     img = Column(String(255))
     name = Column(Text)
-    created_date = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_date = Column(DateTime, default=datetime.datetime.utcnow)
+    created_date = Column(String(50), default=str(datetime.datetime.utcnow))
+    updated_date = Column(String(50), default=str(datetime.datetime.utcnow))
 
 
 class Issues(Base):
     __tablename__ = 'issues'
     id = Column(String(50), primary_key=True)
+    object_id = Column(String(50), unique=True)
     url = Column(String(255))
-    source_id = Column(String(255), ForeignKey("sources.id"))
-    created_date = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_date = Column(DateTime, default=datetime.datetime.utcnow)
+    source_id = Column(String(255), ForeignKey("sources.object_id"))
+    created_date = Column(String(50), default=str(datetime.datetime.utcnow))
+    updated_date = Column(String(50), default=str(datetime.datetime.utcnow))
 
 
 class Articles(Base):
     __tablename__ = 'articles'
     id = Column(String(50), primary_key=True)
+    object_id = Column(String(50), unique=True)
     url = Column(String(255))
     img = Column(String(255))
     pre_content = Column(String(255))
-    source_id = Column(String(255), ForeignKey("sources.id"))
-    issue_id = Column(String(255), ForeignKey("issues.id"))
-    created_date = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_date = Column(DateTime, default=datetime.datetime.utcnow)
+    source_id = Column(String(255), ForeignKey("sources.object_id"))
+    issue_id = Column(String(255), ForeignKey("issues.object_id"))
+    created_date = Column(String(50), default=str(datetime.datetime.utcnow))
+    updated_date = Column(String(50), default=str(datetime.datetime.utcnow))
