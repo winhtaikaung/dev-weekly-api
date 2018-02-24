@@ -3,8 +3,8 @@ from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
 from sqlalchemy import or_
 
-from database import db_session, User as UserModel, Source as SourceModel, Issues as IssueModel, \
-    Articles as ArticleModel
+from database import db_session, User as UserModel, Source as SourceModel, Issue as IssueModel, \
+    Article as ArticleModel
 
 
 class Users(SQLAlchemyObjectType):
@@ -115,7 +115,9 @@ class Query(graphene.ObjectType):
         id = args.get('source_id')
         name = args.get('source_name')
         # you can also use and_ with filter() eg: filter(and_(param1, param2)).first()
-        return query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
+        source =  query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
+
+        return source
 
 
 class MyMutations(graphene.ObjectType):
