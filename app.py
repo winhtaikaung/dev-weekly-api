@@ -6,6 +6,7 @@ from flask_graphql import GraphQLView
 
 from database import db_session, Base as model_base, engine
 from schema import schema
+from seeds import gen_seeds
 
 app = Flask(__name__)
 app.debug = True
@@ -21,4 +22,5 @@ def index():
 
 if __name__ == "__main__":
     model_base.metadata.create_all(engine)
+    gen_seeds()
     app.run()

@@ -1,5 +1,6 @@
-# Python-Flask & Graphene-SQLAlchemy(GraphQL) Example
-This is an example project for using GraphQL with Flask using Graphene-SQLAlchemy.
+# dev-weekly-api
+A collection of the weekly news letters from multiple resources like android weekly,iOSweekly,javascriptweekly,reactjsweekly,golangweekly,etc ...
+
 
 ## Installing Requirements
 Use Virtualenv and install the packages.

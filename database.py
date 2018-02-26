@@ -1,4 +1,5 @@
 import datetime
+from time import strftime, gmtime
 
 from sqlalchemy import Column, Integer, Text, String, ForeignKey
 from sqlalchemy import create_engine
@@ -28,11 +29,12 @@ class Source(Base):
     object_id = Column(String(50), unique=True)
     img = Column(String(255))
     name = Column(Text)
+    base_url = Column(String(50))
     issue = relationship("Issue", uselist=True)
     # article = relationship("Article", back_populates="source")
 
-    created_date = Column(String(50), default=str(datetime.datetime.utcnow))
-    updated_date = Column(String(50), default=str(datetime.datetime.utcnow))
+    created_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
+    updated_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
 
 
 class Issue(Base):
@@ -43,8 +45,8 @@ class Issue(Base):
     source_id = Column(String(255), ForeignKey("source.object_id"))
 
     article = relationship("Article",uselist=True)
-    created_date = Column(String(50), default=str(datetime.datetime.utcnow))
-    updated_date = Column(String(50), default=str(datetime.datetime.utcnow))
+    created_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
+    updated_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
 
 
 class Article(Base):
@@ -56,5 +58,5 @@ class Article(Base):
     pre_content = Column(String(500))
     source_id = Column(String(255), ForeignKey("source.object_id"))
     issue_id = Column(String(255), ForeignKey("issue.object_id"))
-    created_date = Column(String(50), default=str(datetime.datetime.utcnow))
-    updated_date = Column(String(50), default=str(datetime.datetime.utcnow))
+    created_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
+    updated_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
