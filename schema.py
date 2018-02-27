@@ -115,7 +115,7 @@ class Query(graphene.ObjectType):
         id = args.get('source_id')
         name = args.get('source_name')
         # you can also use and_ with filter() eg: filter(and_(param1, param2)).first()
-        source =  query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
+        source = query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
 
         return source
 

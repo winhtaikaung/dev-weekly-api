@@ -1,4 +1,3 @@
-import datetime
 from time import strftime, gmtime
 
 from sqlalchemy import Column, Integer, Text, String, ForeignKey
@@ -44,7 +43,7 @@ class Issue(Base):
     url = Column(String(255))
     source_id = Column(String(255), ForeignKey("source.object_id"))
 
-    article = relationship("Article",uselist=True)
+    article = relationship("Article", uselist=True)
     created_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
     updated_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
 
