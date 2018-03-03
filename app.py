@@ -4,13 +4,20 @@ import os
 
 from flask import Flask
 from flask_graphql import GraphQLView
-
+from os.path import join, dirname
+from dotenv import load_dotenv
 from database import db_session, Base as model_base, engine
 from schema import schema
 from seeds import gen_seeds
 
 app = Flask(__name__)
 app.debug = True
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+# OR, the same with increased verbosity:
+load_dotenv(dotenv_path, verbose=True)
 
 if os.environ["ENV"] != 'prod':
     app.add_url_rule('/api', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True,
