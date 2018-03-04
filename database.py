@@ -41,6 +41,7 @@ class Issue(Base):
     id = Column(String(50), primary_key=True)
     object_id = Column(String(50), unique=True)
     url = Column(String(255))
+    issue_number = Column(String(20))
     source_id = Column(String(255), ForeignKey("source.object_id"))
 
     article = relationship("Article", uselist=True)

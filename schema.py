@@ -99,22 +99,42 @@ class Query(graphene.ObjectType):
     # user = SQLAlchemyConnectionField(Users)
     sources = SQLAlchemyConnectionField(Source)
     source = graphene.Field(lambda: Source, source_id=graphene.String(), source_name=graphene.String())
+
     issues = SQLAlchemyConnectionField(Issue)
+    issue = graphene.Field(lambda: Issue, issue_id=graphene.String(), url=graphene.String(),
+                           issue_number=graphene.String())
     articles = SQLAlchemyConnectionField(Article)
-    find_user = graphene.Field(lambda: Users, username=graphene.String())
-    all_users = SQLAlchemyConnectionField(Users)
+    article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String(), )
+
+    # find_user = graphene.Field(lambda: Users, username=graphene.String())
+    # all_users = SQLAlchemyConnectionField(Users)
+
+    def resolve_issue(self, args, context, info):
+        query = Issue.get_query(context)
+        id = args.get("issue_id")
+        url = args.get("issue_url")
+        issue_number = args.get("issue_number")
+        issue = query.filter(
+            or_(IssueModel.object_id == id, (IssueModel.url == url), (IssueModel.issue_number == issue_number))).first()
+        return issue
+
+    def resolve_article(self, args, context, info):
+        query = Article.get_query(context)
+        id = args.get("article_id")
+        content = args.get("article_content")
+        article = query.filter(
+            or_(ArticleModel.object_id == id, (content in ArticleModel.pre_content))).first()
+        return article
 
     def resolve_find_user(self, args, context, info):
         query = Users.get_query(context)
         username = args.get('username')
-        # you can also use and_ with filter() eg: filter(and_(param1, param2)).first()
         return query.filter(UserModel.username == username).first()
 
     def resolve_source(self, args, context, info):
         query = Source.get_query(context)
         id = args.get('source_id')
         name = args.get('source_name')
-        # you can also use and_ with filter() eg: filter(and_(param1, param2)).first()
         source = query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
 
         return source
@@ -125,4 +145,4 @@ class MyMutations(graphene.ObjectType):
     change_username = changeUsername.Field()
 
 
-schema = graphene.Schema(query=Query, mutation=MyMutations, types=[Users])
+schema = graphene.Schema(query=Query, mutation=MyMutations, types=[Source, Issue, Article])

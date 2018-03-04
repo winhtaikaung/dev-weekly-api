@@ -1,11 +1,12 @@
 #! usr/bin/python
 # -*- coding: utf-8 -*-
 import os
+from os.path import join, dirname
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_graphql import GraphQLView
-from os.path import join, dirname
-from dotenv import load_dotenv
+
 from database import db_session, Base as model_base, engine
 from schema import schema
 from seeds import gen_seeds
@@ -36,5 +37,6 @@ if __name__ == "__main__":
     exists = engine.dialect.has_table(engine.connect(), "source")
     if exists is False:
         model_base.metadata.create_all(engine)
+
         gen_seeds()
     app.run()
