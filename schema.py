@@ -123,7 +123,7 @@ class Query(graphene.ObjectType):
         id = args.get("article_id")
         content = args.get("article_content")
         article = query.filter(
-            or_(ArticleModel.object_id == id, (content in ArticleModel.pre_content))).first()
+            or_(ArticleModel.object_id == id, (ArticleModel.pre_content.like("%content%")))).first()
         return article
 
     def resolve_find_user(self, args, context, info):
