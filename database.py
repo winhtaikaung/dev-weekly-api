@@ -26,9 +26,10 @@ class Source(Base):
     __tablename__ = 'source'
     id = Column(String(50), primary_key=True)
     object_id = Column(String(50), unique=True)
+    tag = Column(String(20))
     img = Column(String(255))
-    name = Column(Text)
-    base_url = Column(String(50))
+    name = Column(Text, unique=True)
+    base_url = Column(String(50), unique=True)
     issue = relationship("Issue", uselist=True)
     # article = relationship("Article", back_populates="source")
 
@@ -55,6 +56,8 @@ class Article(Base):
     object_id = Column(String(50), unique=True)
     url = Column(String(255))
     img = Column(String(255))
+    main_url = Column(String(255))
+    title = Column(String(255))
     pre_content = Column(String(500))
     source_id = Column(String(255), ForeignKey("source.object_id"))
     issue_id = Column(String(255), ForeignKey("issue.object_id"))
