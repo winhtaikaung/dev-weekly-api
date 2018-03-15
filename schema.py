@@ -4,7 +4,7 @@ from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
 from sqlalchemy import or_
 
 from database import db_session, User as UserModel, Source as SourceModel, Issue as IssueModel, \
-    Article as ArticleModel
+    Article as ArticleModel, gen_offset_from_page
 
 
 class Users(SQLAlchemyObjectType):
@@ -100,14 +100,26 @@ class Query(graphene.ObjectType):
     sources = SQLAlchemyConnectionField(Source)
     source = graphene.Field(lambda: Source, source_id=graphene.String(), source_name=graphene.String())
 
-    issues = SQLAlchemyConnectionField(Issue)
+    def resolve_source(self, args, context, info):
+        query = Source.get_query(context)
+        id = args.get('source_id')
+        name = args.get('source_name')
+        source = query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
+
+        return source
+
+    # issues = SQLAlchemyConnectionField(Issue)
+    issues = graphene.Field(lambda: IssueResult, limit=graphene.Int(), page=graphene.Int())
     issue = graphene.Field(lambda: Issue, issue_id=graphene.String(), url=graphene.String(),
                            issue_number=graphene.String())
-    articles = SQLAlchemyConnectionField(Article)
-    article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String(), )
 
-    # find_user = graphene.Field(lambda: Users, username=graphene.String())
-    # all_users = SQLAlchemyConnectionField(Users)
+    def resolve_issues(self, args, context, info):
+        limit = args.get("limit")
+        page = args.get("page")
+        # all_issue = Issue.get_query(context).all()
+        result = Issue.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
+        return IssueResult(data=result,
+                           meta=MetaObject({"total_pages": 1, "current": 1, "prev_page": 1, "next_page": 1}))
 
     def resolve_issue(self, args, context, info):
         query = Issue.get_query(context)
@@ -118,6 +130,9 @@ class Query(graphene.ObjectType):
             or_(IssueModel.object_id == id, (IssueModel.url == url), (IssueModel.issue_number == issue_number))).first()
         return issue
 
+    articles = SQLAlchemyConnectionField(Article)
+    article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String(), )
+
     def resolve_article(self, args, context, info):
         query = Article.get_query(context)
         id = args.get("article_id")
@@ -126,18 +141,13 @@ class Query(graphene.ObjectType):
             or_(ArticleModel.object_id == id, (ArticleModel.pre_content.like("%content%")))).first()
         return article
 
+    # find_user = graphene.Field(lambda: Users, username=graphene.String())
+    # all_users = SQLAlchemyConnectionField(Users)
+
     def resolve_find_user(self, args, context, info):
         query = Users.get_query(context)
         username = args.get('username')
         return query.filter(UserModel.username == username).first()
-
-    def resolve_source(self, args, context, info):
-        query = Source.get_query(context)
-        id = args.get('source_id')
-        name = args.get('source_name')
-        source = query.filter(or_(SourceModel.object_id == id, (SourceModel.name == name))).first()
-
-        return source
 
 
 class MyMutations(graphene.ObjectType):
