@@ -59,8 +59,8 @@ class User(Base):
 
 class Source(Base):
     __tablename__ = 'source'
-    id = Column(String(50), primary_key=True)
-    object_id = Column(String(50), unique=True)
+    id = Column(String(50), primary_key=True,index=True)
+    object_id = Column(String(50), unique=True,index=True)
     tag = Column(String(20))
     img = Column(String(255))
     name = Column(Text, unique=True)
@@ -74,8 +74,8 @@ class Source(Base):
 
 class Issue(Base):
     __tablename__ = 'issue'
-    id = Column(String(50), primary_key=True)
-    object_id = Column(String(50), unique=True)
+    id = Column(String(50), primary_key=True,index=True)
+    object_id = Column(String(50), unique=True,index=True)
     url = Column(String(255))
     issue_number = Column(String(20))
     source_id = Column(String(255), ForeignKey("source.object_id"))
@@ -87,8 +87,8 @@ class Issue(Base):
 
 class Article(Base):
     __tablename__ = 'article'
-    id = Column(String(50), primary_key=True)
-    object_id = Column(String(50), unique=True)
+    id = Column(String(50), primary_key=True,index=True)
+    object_id = Column(String(50), unique=True,index=True)
     url = Column(String(255))
     img = Column(String(255))
     main_url = Column(String(255))

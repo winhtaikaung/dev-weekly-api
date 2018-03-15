@@ -48,7 +48,7 @@ class IssueResult(graphene.ObjectType):
     data = graphene.List(of_type=Issue)
 
 
-class AtticleResult(graphene.ObjectType):
+class ArticleResult(graphene.ObjectType):
     meta = graphene.Field(MetaObject)
     data = graphene.List(of_type=Article)
 
@@ -145,7 +145,7 @@ class Query(graphene.ObjectType):
         return issue
 
     article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String())
-    articles = graphene.Field(lambda: AtticleResult, limit=graphene.Int(), page=graphene.Int())
+    articles = graphene.Field(lambda: ArticleResult, limit=graphene.Int(), page=graphene.Int())
 
     def resolve_articles(self, args, context, info):
         limit = args.get("limit")
@@ -153,7 +153,7 @@ class Query(graphene.ObjectType):
         all_issue = Article.get_query(context).all()
         result = Article.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
         meta_obj = generate_meta(limit, page, all_issue)
-        return AtticleResult(data=result,
+        return ArticleResult(data=result,
                              meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
                                              prev_page=meta_obj["prev_page"], next_page=meta_obj["next_page"]))
 
@@ -179,4 +179,4 @@ class MyMutations(graphene.ObjectType):
     change_username = changeUsername.Field()
 
 
-schema = graphene.Schema(query=Query, mutation=MyMutations, types=[Source, Issue, Article])
+schema = graphene.Schema(query=Query, types=[Source, Issue, Article])
