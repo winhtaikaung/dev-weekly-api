@@ -1,10 +1,10 @@
 import graphene
 from graphene import relay
-from graphene_sqlalchemy import SQLAlchemyConnectionField, SQLAlchemyObjectType
+from graphene_sqlalchemy import SQLAlchemyObjectType
 from sqlalchemy import or_
 
 from database import db_session, User as UserModel, Source as SourceModel, Issue as IssueModel, \
-    Article as ArticleModel, gen_offset_from_page
+    Article as ArticleModel, gen_offset_from_page, generate_meta
 
 
 class Users(SQLAlchemyObjectType):
@@ -97,8 +97,19 @@ class changeUsername(graphene.Mutation):
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
     # user = SQLAlchemyConnectionField(Users)
-    sources = SQLAlchemyConnectionField(Source)
+
+    sources = graphene.Field(lambda: SourceResult, limit=graphene.Int(), page=graphene.Int())
     source = graphene.Field(lambda: Source, source_id=graphene.String(), source_name=graphene.String())
+
+    def resolve_sources(self, args, context, info):
+        limit = args.get("limit")
+        page = args.get("page")
+        all_issue = Source.get_query(context).all()
+        result = Source.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
+        meta_obj = generate_meta(limit, page, all_issue)
+        return IssueResult(data=result,
+                           meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
+                                           prev_page=meta_obj["prev_page"], next_page=meta_obj["next_page"]))
 
     def resolve_source(self, args, context, info):
         query = Source.get_query(context)
@@ -116,10 +127,12 @@ class Query(graphene.ObjectType):
     def resolve_issues(self, args, context, info):
         limit = args.get("limit")
         page = args.get("page")
-        # all_issue = Issue.get_query(context).all()
+        all_issue = Issue.get_query(context).all()
         result = Issue.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
+        meta_obj = generate_meta(limit, page, all_issue)
         return IssueResult(data=result,
-                           meta=MetaObject({"total_pages": 1, "current": 1, "prev_page": 1, "next_page": 1}))
+                           meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
+                                           prev_page=meta_obj["prev_page"], next_page=meta_obj["next_page"]))
 
     def resolve_issue(self, args, context, info):
         query = Issue.get_query(context)
@@ -127,11 +140,22 @@ class Query(graphene.ObjectType):
         url = args.get("issue_url")
         issue_number = args.get("issue_number")
         issue = query.filter(
-            or_(IssueModel.object_id == id, (IssueModel.url == url), (IssueModel.issue_number == issue_number))).first()
+            or_(IssueModel.object_id == id, (IssueModel.url == url),
+                (IssueModel.issue_number == issue_number))).first()
         return issue
 
-    articles = SQLAlchemyConnectionField(Article)
-    article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String(), )
+    article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String())
+    articles = graphene.Field(lambda: AtticleResult, limit=graphene.Int(), page=graphene.Int())
+
+    def resolve_articles(self, args, context, info):
+        limit = args.get("limit")
+        page = args.get("page")
+        all_issue = Article.get_query(context).all()
+        result = Article.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
+        meta_obj = generate_meta(limit, page, all_issue)
+        return AtticleResult(data=result,
+                             meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
+                                             prev_page=meta_obj["prev_page"], next_page=meta_obj["next_page"]))
 
     def resolve_article(self, args, context, info):
         query = Article.get_query(context)

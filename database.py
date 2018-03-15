@@ -21,6 +21,7 @@ def gen_offset_from_page(page, limit):
         page = 1
     return (page * limit) - limit
 
+
 def generate_meta(limit, page, total_items):
     """
     This method help to generate links and metadata object
@@ -30,7 +31,7 @@ def generate_meta(limit, page, total_items):
     :param page_count:
     :return:
     """
-    meta_object={}
+    meta_object = {}
     total_count = len(total_items) if len(total_items) is not 0 else 0
     total_pages = total_count / limit
     modulus = total_count % limit
@@ -40,12 +41,13 @@ def generate_meta(limit, page, total_items):
     meta_object["total_page"] = total_pages
     if total_pages > page:
         meta_object["next_page"] = page + 1
-        meta_object["prev_page"] = page - 1
+        meta_object["prev_page"] = None if page - 1 is 0 else page - 1
     else:
-
+        meta_object["next_page"] = None
         meta_object["prev_page"] = page - 1
 
     return meta_object
+
 
 class User(Base):
     __tablename__ = 'user'

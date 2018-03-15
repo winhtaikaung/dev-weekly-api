@@ -1,5 +1,6 @@
-import os
 import unittest
+
+from database import generate_meta
 
 
 class MockResponse(object):
@@ -10,9 +11,6 @@ class MockResponse(object):
 
 class TestScrapper(unittest.TestCase):
 
-    def test_androidweekly_scrapper(self):
-        html = str(os.environ["AW_HTML"])
-
-        from scrapper import AndroidWeeklyScrapper
-        AndroidWeeklyScrapper().scrap_response("", "http://androidweekly.net/issues/", "105")
-        self.assertEqual([], [])
+    def test_page(self):
+        print(generate_meta(10, 1, [None] * 100))
+        print(generate_meta(10, 10, [None] * 100))
