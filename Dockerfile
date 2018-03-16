@@ -4,8 +4,8 @@ MAINTAINER winhtaikaung(winhtaikaung28@hotmail.com)
 
 RUN apt-get update
 RUN apt-get install varnish -y
-COPY varnish /etc/default/ -y
-COPY default.vcl /etc/default/ -y
+COPY varnish /etc/default/
+COPY default.vcl /etc/default/
 
 RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app/
@@ -20,4 +20,4 @@ EXPOSE 5000
 CMD service varnish restart
 CMD varnishstat
 
-CMD sh python /usr/src/app/app.py
+CMD sh /usr/src/app/run.sh

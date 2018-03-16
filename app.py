@@ -15,7 +15,7 @@ from scrapper import AndroidWeeklyScrapper
 from seeds import gen_seeds
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -65,4 +65,4 @@ if __name__ == "__main__":
         model_base.metadata.create_all(engine)
 
         gen_seeds()
-    app.run()
+    app.run(host='0.0.0.0')
