@@ -1,0 +1,6 @@
+DAEMON _OPTS="-a :80\
+  -T localhost:5000
+  -f /etc/varnish/dev-weekly-cache.vcl
+  -s malloc,256m"
+  -S /etc/varnish/secret
+  -s file,/var/lib/varnish/$INSTANCE/varnish_storage.bin,1G"
