@@ -120,15 +120,17 @@ class Query(graphene.ObjectType):
         return source
 
     # issues = SQLAlchemyConnectionField(Issue)
-    issues = graphene.Field(lambda: IssueResult, limit=graphene.Int(), page=graphene.Int())
+    issues = graphene.Field(lambda: IssueResult, limit=graphene.Int(), page=graphene.Int(), source_id=graphene.String())
     issue = graphene.Field(lambda: Issue, issue_id=graphene.String(), url=graphene.String(),
                            issue_number=graphene.String())
 
     def resolve_issues(self, args, context, info):
         limit = args.get("limit")
         page = args.get("page")
-        all_issue = Issue.get_query(context).all()
-        result = Issue.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
+        source_id = args.get("source_id")
+        all_issue = Issue.get_query(context).filter(IssueModel.source_id == source_id).all()
+        result = Issue.get_query(context).filter(IssueModel.source_id == source_id).limit(limit).offset(
+            gen_offset_from_page(page, limit))
         meta_obj = generate_meta(limit, page, all_issue)
         return IssueResult(data=result,
                            meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
@@ -145,13 +147,16 @@ class Query(graphene.ObjectType):
         return issue
 
     article = graphene.Field(lambda: Article, article_id=graphene.String(), article_content=graphene.String())
-    articles = graphene.Field(lambda: ArticleResult, limit=graphene.Int(), page=graphene.Int())
+    articles = graphene.Field(lambda: ArticleResult, limit=graphene.Int(), page=graphene.Int(),
+                              issue_id=graphene.String())
 
     def resolve_articles(self, args, context, info):
         limit = args.get("limit")
         page = args.get("page")
-        all_issue = Article.get_query(context).all()
-        result = Article.get_query(context).limit(limit).offset(gen_offset_from_page(page, limit))
+        issue_id = args.get("issue_id")
+        all_issue = Article.get_query(context).filter(ArticleModel.issue_id == issue_id).all()
+        result = Article.get_query(context).filter(ArticleModel.issue_id == issue_id).limit(limit).offset(
+            gen_offset_from_page(page, limit))
         meta_obj = generate_meta(limit, page, all_issue)
         return ArticleResult(data=result,
                              meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
