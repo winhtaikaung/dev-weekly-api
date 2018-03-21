@@ -13,21 +13,24 @@ from database import db_session, Base as model_base, engine, Source
 from schema import schema
 from scrapper import AndroidWeeklyScrapper
 from seeds import gen_seeds
-
-app = Flask(__name__)
-app.debug = False
-
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 # OR, the same with increased verbosity:
 load_dotenv(dotenv_path, verbose=True)
 
+app = Flask(__name__)
+
+
 if os.environ["ENV"] != 'prod':
+    app.debug = True
     app.add_url_rule('/api', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True,
                                                            context={'session': db_session}))
 else:
+    app.debug = False
     app.add_url_rule('/api', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=False,
+                                                           context={'session': db_session}))
+    app.add_url_rule('/playground', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True,
                                                            context={'session': db_session}))
 
 
