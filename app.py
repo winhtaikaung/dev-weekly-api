@@ -70,4 +70,4 @@ if __name__ == "__main__":
         model_base.metadata.create_all(engine)
 
         gen_seeds()
-    app.run()
+    app.run(host="0.0.0.0")

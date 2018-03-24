@@ -2,8 +2,6 @@
 FROM python:3.6.4
 MAINTAINER winhtaikaung(winhtaikaung28@hotmail.com)
 
-RUN apt-get update
-
 RUN mkdir -p /usr/src/app/
 WORKDIR /usr/src/app/
 
@@ -15,4 +13,4 @@ COPY run.sh /usr/src/app/
 EXPOSE 5000
 
 
-CMD sh python /usr/src/app/app.py
+CMD sh  /usr/src/app/run.sh
