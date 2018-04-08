@@ -120,4 +120,4 @@ class Article(Base):
     issue_id = Column(String(255), ForeignKey("issue.object_id"))
     created_date = Column(BIGINT(), default=calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
     # updated_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
-    updated_date = Column(BIGINT(), default=calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+    updated_date = Column(BIGINT(), default=calendar.timegm(datetime.datetime.utcnow().utctimetuple())-86500)

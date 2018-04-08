@@ -205,8 +205,6 @@ class Query(graphene.ObjectType):
         except Exception as e:
             print(e)
             db_session.rollback()
-        finally:
-            db_session.close()
         return article
 
     # find_user = graphene.Field(lambda: Users, username=graphene.String())
