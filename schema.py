@@ -1,6 +1,12 @@
+import calendar
+import datetime
+
 import graphene
+from flask import render_template
 from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
+from pip._vendor import requests
+from readability import Document
 from sqlalchemy import or_
 
 from database import db_session, User as UserModel, Source as SourceModel, Issue as IssueModel, \
@@ -165,9 +171,42 @@ class Query(graphene.ObjectType):
     def resolve_article(self, args, context, info):
         query = Article.get_query(context)
         id = args.get("article_id")
-        content = args.get("article_content")
+        title = args.get("article_content")
         article = query.filter(
-            or_(ArticleModel.object_id == id, (ArticleModel.pre_content.like("%content%")))).first()
+            or_(ArticleModel.object_id == id, (ArticleModel.title.like("%title%")))).first()
+
+        try:
+            if article.article_view_content is not None:
+                # TIME based DB content cache with cache expire of 1 day
+                if calendar.timegm(datetime.datetime.utcnow().utctimetuple()) - article.updated_date > 86400:
+                    response = requests.get(
+                        article.url)
+                    doc = Document(response.text)
+                    article.article_view_content = str(
+                        render_template('article.html', article_content=doc.summary(True), title=str(doc.short_title()),
+                                        article=str(doc.title()),
+                                        base_url=article.main_url, article_url=article.url)).encode('utf-8')
+                    article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+                    db_session.commit()
+
+
+                else:
+                    pass
+            else:
+                response = requests.get(
+                    article.url)
+                doc = Document(response.text)
+                article.article_view_content = str(
+                    render_template('article.html', article_content=doc.summary(True), title=str(doc.short_title()),
+                                    article=str(doc.title()),
+                                    base_url=article.main_url, article_url=article.url)).encode('utf-8')
+                article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+                db_session.commit()
+        except Exception as e:
+            print(e)
+            db_session.rollback()
+        finally:
+            db_session.close()
         return article
 
     # find_user = graphene.Field(lambda: Users, username=graphene.String())
