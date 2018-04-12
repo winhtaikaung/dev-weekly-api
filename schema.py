@@ -191,8 +191,6 @@ class Query(graphene.ObjectType):
                         'utf-8')
                     article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
                     db_session.commit()
-
-
                 else:
                     pass
             else:
@@ -200,7 +198,8 @@ class Query(graphene.ObjectType):
                     article.url)
                 doc = Document(response.text)
                 article.article_view_content = str(
-                    render_template('article.html', article_content=doc.summary(True), title=str(doc.short_title()),
+                    render_template('body_template.html', article_content=doc.summary(True),
+                                    title=str(doc.short_title()),
                                     article=str(doc.title()),
                                     base_url=article.main_url, article_url=article.url)) \
                     .replace("\"", "'").replace("\n", "").replace("\t", "").replace("$", "&#36;").encode('utf-8')
@@ -209,6 +208,8 @@ class Query(graphene.ObjectType):
         except Exception as e:
             print(e)
             db_session.rollback()
+
+
         return article
 
     # find_user = graphene.Field(lambda: Users, username=graphene.String())
