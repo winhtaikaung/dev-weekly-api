@@ -186,9 +186,10 @@ class Query(graphene.ObjectType):
                         render_template('body_template.html', article_content=doc.summary(True),
                                         title=str(doc.short_title()),
                                         article=str(doc.title()),
-                                        base_url=article.main_url, article_url=article.url)).replace("\"", "'").replace("\n","").encode(
+                                        base_url=article.main_url, article_url=article.url)).replace("\"", "'") \
+                        .replace("\n", "").replace("\t", "").encode(
                         'utf-8')
-                    # article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+                    article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
                     db_session.commit()
 
 
@@ -201,8 +202,9 @@ class Query(graphene.ObjectType):
                 article.article_view_content = str(
                     render_template('article.html', article_content=doc.summary(True), title=str(doc.short_title()),
                                     article=str(doc.title()),
-                                    base_url=article.main_url, article_url=article.url)).replace("\"", "'").replace("\n","").encode('utf-8')
-                # article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+                                    base_url=article.main_url, article_url=article.url)) \
+                    .replace("\"", "'").replace("\n", "").replace("\t", "").encode('utf-8')
+                article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
                 db_session.commit()
         except Exception as e:
             print(e)
