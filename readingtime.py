@@ -9,7 +9,7 @@ class Lang(Enum):
 
 
 class ReadingTime:
-    def __init__(self, wpm=270):
+    def __init__(self, wpm=275):
         self.wpm = wpm
 
     def _word_count(self, text=None):
