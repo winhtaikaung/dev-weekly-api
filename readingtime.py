@@ -1,5 +1,9 @@
 import math
+
 from enum import Enum
+
+from pyquery import PyQuery as pq
+from pip._vendor import requests
 
 
 class Lang(Enum):
@@ -38,7 +42,13 @@ class ReadingTime:
         }
         return option[lang]
 
-    def time(self, text=None, format=True, lang=Lang.EN):
+    def _extract_text(self, url):
+            response = requests.get(url)
+            html=response.text
+            texts = pq(html)('body p').text()
+            return texts
+
+    def estimate(self, text=None, format=True, lang=Lang.EN):
 
         if format is True:
             if self._total_reading_time_second(text) < 60:
@@ -53,3 +63,7 @@ class ReadingTime:
                 return self._total_reading_time_second(text)
             else:
                 return self._total_reading_time_minute(text)
+
+    def estimate_url(self, url=None, format=True, lang=Lang.EN):
+        texts = self._extract_text(url)
+        return self.estimate(texts, format, lang)
