@@ -53,9 +53,9 @@ class ReadingTime:
         if format is True:
             if self._total_reading_time_second(text) < 60:
                 if self._total_reading_time_second(text) < 10:
-                    return self._lang(lang)["less_sec"].format(reading_time=self._total_reading_time_second(text))
+                    return self._lang(lang)["less_sec"].format(reading_time=math.floor(self._total_reading_time_second(text)))
                 else:
-                    return self._lang(lang)["sec"].format(reading_time=self._total_reading_time_second(text))
+                    return self._lang(lang)["sec"].format(reading_time=math.floor(self._total_reading_time_second(text)))
             else:
                 return self._lang(lang)["min"].format(reading_time=self._total_reading_time_minute(text))
         else:

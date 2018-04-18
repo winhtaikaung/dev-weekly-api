@@ -6,11 +6,13 @@ from flask import render_template
 from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyObjectType
 from pip._vendor import requests
+from pyquery import PyQuery as pq
 from readability import Document
 from sqlalchemy import or_
 
 from database import db_session, User as UserModel, Source as SourceModel, Issue as IssueModel, \
     Article as ArticleModel, gen_offset_from_page, generate_meta
+from readingtime import ReadingTime
 
 
 class Users(SQLAlchemyObjectType):
@@ -182,10 +184,12 @@ class Query(graphene.ObjectType):
                     response = requests.get(
                         article.url)
                     doc = Document(response.text)
+                    texts = pq(response.text)('body p').text()
                     article.article_view_content = str(
                         render_template('body_template.html', article_content=doc.summary(True),
                                         title=str(doc.short_title()),
                                         article=str(doc.title()),
+                                        read_time=str(ReadingTime().estimate(texts, True)),
                                         base_url=article.main_url, article_url=article.url)).replace("\"", "'") \
                         .replace("\n", "").replace("\t", "").replace("$", "&#36;").encode(
                         'utf-8')
@@ -197,10 +201,13 @@ class Query(graphene.ObjectType):
                 response = requests.get(
                     article.url)
                 doc = Document(response.text)
+                texts = pq(response.text)('body p').text()
+
                 article.article_view_content = str(
                     render_template('body_template.html', article_content=doc.summary(True),
                                     title=str(doc.short_title()),
                                     article=str(doc.title()),
+                                    read_time=str(ReadingTime().estimate(texts, True)),
                                     base_url=article.main_url, article_url=article.url)) \
                     .replace("\"", "'").replace("\n", "").replace("\t", "").replace("$", "&#36;").encode('utf-8')
                 article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
@@ -208,7 +215,6 @@ class Query(graphene.ObjectType):
         except Exception as e:
             print(e)
             db_session.rollback()
-
 
         return article
 
