@@ -42,7 +42,7 @@ class AndroidWeeklyScrapper(object):
                     ".article-headline").attr("href"):
                 article = Article(id=article_id, object_id=article_id,
                                   pre_content=table.children("p").text().encode('utf-8'),
-                                  article_view_content="lorem ipsum dollar".encode('utf-8'),
+                                  article_view_content=None,
                                   issue_id=issue_id, source_id=source_id,
                                   main_url=table.children(".main-url").text().encode('utf-8'),
                                   url=table.children(".article-headline").attr("href").encode('utf-8'),

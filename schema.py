@@ -8,7 +8,7 @@ from graphene_sqlalchemy import SQLAlchemyObjectType
 from pip._vendor import requests
 from pyquery import PyQuery as pq
 from readability import Document
-from sqlalchemy import or_
+from sqlalchemy import or_, desc
 
 from database import db_session, User as UserModel, Source as SourceModel, Issue as IssueModel, \
     Article as ArticleModel, gen_offset_from_page, generate_meta
@@ -137,7 +137,8 @@ class Query(graphene.ObjectType):
         page = args.get("page")
         source_id = args.get("source_id")
         all_issue = Issue.get_query(context).filter(IssueModel.source_id == source_id).all()
-        result = Issue.get_query(context).filter(IssueModel.source_id == source_id).limit(limit).offset(
+        result = Issue.get_query(context).filter(IssueModel.source_id == source_id).order_by(
+            desc(IssueModel.issue_number)).limit(limit).offset(
             gen_offset_from_page(page, limit))
         meta_obj = generate_meta(limit, page, all_issue)
         return IssueResult(data=result,
@@ -165,6 +166,29 @@ class Query(graphene.ObjectType):
         all_issue = Article.get_query(context).filter(ArticleModel.issue_id == issue_id).all()
         result = Article.get_query(context).filter(ArticleModel.issue_id == issue_id).limit(limit).offset(
             gen_offset_from_page(page, limit))
+        for article in result:
+            try:
+                if article.article_view_content is not None:
+                    # TIME based DB content cache with cache expire of 1 day
+                    pass
+                else:
+                    response = requests.get(
+                        article.url)
+                    doc = Document(response.text)
+                    texts = pq(response.text)('body').text()
+
+                    article.article_view_content = str(
+                        render_template('body_template.html', article_content=doc.summary(True),
+                                        title=str(doc.short_title()),
+                                        article=str(doc.title()),
+                                        read_time=str(ReadingTime().estimate(texts, True)),
+                                        base_url=article.main_url, article_url=article.url)) \
+                        .replace("\"", "'").replace("\n", "").replace("\t", "").replace("$", "&#36;").encode('utf-8')
+                    article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+                    db_session.commit()
+            except Exception as e:
+                print(e)
+                db_session.rollback()
         meta_obj = generate_meta(limit, page, all_issue)
         return ArticleResult(data=result,
                              meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
@@ -180,29 +204,12 @@ class Query(graphene.ObjectType):
         try:
             if article.article_view_content is not None:
                 # TIME based DB content cache with cache expire of 1 day
-                if calendar.timegm(datetime.datetime.utcnow().utctimetuple()) - article.updated_date > 86400:
-                    response = requests.get(
-                        article.url)
-                    doc = Document(response.text)
-                    texts = pq(response.text)('body p').text()
-                    article.article_view_content = str(
-                        render_template('body_template.html', article_content=doc.summary(True),
-                                        title=str(doc.short_title()),
-                                        article=str(doc.title()),
-                                        read_time=str(ReadingTime().estimate(texts, True)),
-                                        base_url=article.main_url, article_url=article.url)).replace("\"", "'") \
-                        .replace("\n", "").replace("\t", "").replace("$", "&#36;").encode(
-                        'utf-8')
-                    article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
-                    db_session.commit()
-                else:
-                    pass
+                pass
             else:
                 response = requests.get(
                     article.url)
                 doc = Document(response.text)
-                texts = pq(response.text)('body p').text()
-
+                texts = pq(response.text)('body').text()
                 article.article_view_content = str(
                     render_template('body_template.html', article_content=doc.summary(True),
                                     title=str(doc.short_title()),
