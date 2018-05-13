@@ -39,16 +39,16 @@ class AndroidWeeklyScrapper(object):
         try:
             if table.children("p").text() is not None and table.children(
                     ".main-url").text() is not None and table.children(
-                    ".article-headline").attr("href"):
+                ".article-headline").attr("href"):
                 article = Article(id=article_id, object_id=article_id,
-                                  pre_content=table.children("p").text().encode('utf-8'),
+                                  pre_content=table.children("p").text(),
                                   article_view_content=None,
                                   issue_id=issue_id, source_id=source_id,
-                                  main_url=table.children(".main-url").text().encode('utf-8'),
-                                  url=table.children(".article-headline").attr("href").encode('utf-8'),
-                                  title=table.children(".article-headline").text().encode('utf-8'),
-                                  img="http://via.placeholder.com/300x300/{0}/{1}?text={2}".format(
-                                      '#%02X%02X%02X' % (r(), r(), r()), "#FFFFFF", "A").encode('utf-8'))
+                                  main_url=table.children(".main-url").text(),
+                                  url=table.children(".article-headline").attr("href"),
+                                  title=table.children(".article-headline").text(),
+                                  img=str("http://via.placeholder.com/300x300/{0}/{1}?text={2}".format(
+                                      '#%02X%02X%02X' % (r(), r(), r()), "#FFFFFF", "A")))
                 db_session.add(article)
                 db_session.commit()
         except Exception as e:

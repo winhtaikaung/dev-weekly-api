@@ -15,18 +15,14 @@ load_dotenv(dotenv_path)
 # OR, the same with increased verbosity:
 load_dotenv(dotenv_path, verbose=True)
 
-url = os.environ["DB_URL_FORMAT"]
-url = url.format(os.environ["DB_USER_NAME"], os.environ["DB_PASSWORD"], os.environ["DB_HOST"], os.environ["DB_PORT"],
-                 os.environ["DB_NAME"])
-
-engine = create_engine(url)
-
-# Replace 'sqlite:///rfg.db' with your path to database
-# engine = create_engine('sqlite:///feeds.db', convert_unicode=True)
-# db_session = scoped_session(sessionmaker(autocommit=False,
-#                                          autoflush=True,
-#                                          bind=engine))
-
+if os.environ["ENV"] != 'develop':
+    url = os.environ["DB_URL_FORMAT"]
+    url = url.format(os.environ["DB_USER_NAME"], os.environ["DB_PASSWORD"], os.environ["DB_HOST"],
+                     os.environ["DB_PORT"],
+                     os.environ["DB_NAME"])
+    engine = create_engine(url)
+else:
+    engine = create_engine('sqlite:///feeds.db', convert_unicode=True)
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -120,4 +116,5 @@ class Article(Base):
     issue_id = Column(String(255), ForeignKey("issue.object_id"))
     created_date = Column(BIGINT(), default=calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
     # updated_date = Column(String(50), default=str(strftime("%a, %d %b %Y %X +0000", gmtime())))
-    updated_date = Column(BIGINT(), default=calendar.timegm(datetime.datetime.utcnow().utctimetuple())-86500)
+    likes = Column(BIGINT())
+    updated_date = Column(BIGINT(), default=calendar.timegm(datetime.datetime.utcnow().utctimetuple()) - 86500)

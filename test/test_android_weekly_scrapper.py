@@ -16,9 +16,9 @@ class TestScrapper(unittest.TestCase):
     def test_page(self):
         # print(generate_meta(10, 1, [None] * 100))
         # print(generate_meta(10, 10, [None] * 100))
-        for issue_number in range(120, 305):
+        for issue_number in range(120, 306):
             print(issue_number)
-            requests.get("http://localhost:5000/scrap/1a54ed50ad364c07bb21b21819b1238c/{0}".format(issue_number))
+            requests.get("http://localhost:5000/scrap/761908268ad046af81e32b2dc451a263/{0}".format(issue_number))
         print("done")
 
 

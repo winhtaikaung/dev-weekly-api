@@ -22,7 +22,6 @@ load_dotenv(dotenv_path, verbose=True)
 
 app = Flask(__name__)
 
-
 if os.environ["ENV"] != 'production':
     app.debug = True
     app.add_url_rule('/api', view_func=GraphQLView.as_view('graphql', schema=schema, graphiql=True,
@@ -33,7 +32,7 @@ else:
                                                            context={'session': db_session}))
 
     app.add_url_rule('/sandbox', view_func=GraphQLView.as_view('sandbox', schema=schema, graphiql=True,
-                                                           context={'session': db_session}))
+                                                               context={'session': db_session}))
 
 
 class RegexConverter(BaseConverter):

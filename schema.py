@@ -104,7 +104,6 @@ class changeUsername(graphene.Mutation):
 
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
-    # user = SQLAlchemyConnectionField(Users)
 
     sources = graphene.Field(lambda: SourceResult, limit=graphene.Int(), page=graphene.Int())
     source = graphene.Field(lambda: Source, source_id=graphene.String(), source_name=graphene.String())
@@ -127,7 +126,6 @@ class Query(graphene.ObjectType):
 
         return source
 
-    # issues = SQLAlchemyConnectionField(Issue)
     issues = graphene.Field(lambda: IssueResult, limit=graphene.Int(), page=graphene.Int(), source_id=graphene.String())
     issue = graphene.Field(lambda: Issue, issue_id=graphene.String(), url=graphene.String(),
                            issue_number=graphene.String())
@@ -166,29 +164,6 @@ class Query(graphene.ObjectType):
         all_issue = Article.get_query(context).filter(ArticleModel.issue_id == issue_id).all()
         result = Article.get_query(context).filter(ArticleModel.issue_id == issue_id).limit(limit).offset(
             gen_offset_from_page(page, limit))
-        for article in result:
-            try:
-                if article.article_view_content is not None:
-                    # TIME based DB content cache with cache expire of 1 day
-                    pass
-                else:
-                    response = requests.get(
-                        article.url)
-                    doc = Document(response.text)
-                    texts = pq(response.text)('body').text()
-
-                    article.article_view_content = str(
-                        render_template('body_template.html', article_content=doc.summary(True),
-                                        title=str(doc.short_title()),
-                                        article=str(doc.title()),
-                                        read_time=str(ReadingTime().estimate(texts, True)),
-                                        base_url=article.main_url, article_url=article.url)) \
-                        .replace("\"", "'").replace("\n", "").replace("\t", "").replace("$", "&#36;").encode('utf-8')
-                    article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
-                    db_session.commit()
-            except Exception as e:
-                print(e)
-                db_session.rollback()
         meta_obj = generate_meta(limit, page, all_issue)
         return ArticleResult(data=result,
                              meta=MetaObject(total_pages=meta_obj["total_page"], current=meta_obj["current"],
@@ -201,37 +176,28 @@ class Query(graphene.ObjectType):
         article = query.filter(
             or_(ArticleModel.object_id == id, (ArticleModel.title.like("%title%")))).first()
 
-        try:
-            if article.article_view_content is not None:
-                # TIME based DB content cache with cache expire of 1 day
-                pass
-            else:
-                response = requests.get(
-                    article.url)
-                doc = Document(response.text)
-                texts = pq(response.text)('body').text()
-                article.article_view_content = str(
-                    render_template('body_template.html', article_content=doc.summary(True),
-                                    title=str(doc.short_title()),
-                                    article=str(doc.title()),
-                                    read_time=str(ReadingTime().estimate(texts, True)),
-                                    base_url=article.main_url, article_url=article.url)) \
-                    .replace("\"", "'").replace("\n", "").replace("\t", "").replace("$", "&#36;").encode('utf-8')
-                article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
-                db_session.commit()
-        except Exception as e:
-            print(e)
-            db_session.rollback()
-
+        response = requests.get(
+            article.url)
+        doc = Document(response.text)
+        texts = pq(response.text)('body').text()
+        article.updated_date = int(calendar.timegm(datetime.datetime.utcnow().utctimetuple()))
+        article.article_view_content = str(
+            render_template('body_template.html', article_content=doc.summary(True),
+                            title=str(doc.short_title()),
+                            article=str(doc.title()),
+                            read_time=str(ReadingTime().estimate(texts, True)),
+                            base_url=article.main_url, article_url=article.url)) \
+            .replace("\"", "'").replace("\n", "").replace("\t", "").replace("$", "&#36;")
         return article
 
-    # find_user = graphene.Field(lambda: Users, username=graphene.String())
-    # all_users = SQLAlchemyConnectionField(Users)
 
-    def resolve_find_user(self, args, context, info):
-        query = Users.get_query(context)
-        username = args.get('username')
-        return query.filter(UserModel.username == username).first()
+# find_user = graphene.Field(lambda: Users, username=graphene.String())
+# all_users = SQLAlchemyConnectionField(Users)
+
+def resolve_find_user(self, args, context, info):
+    query = Users.get_query(context)
+    username = args.get('username')
+    return query.filter(UserModel.username == username).first()
 
 
 class MyMutations(graphene.ObjectType):
